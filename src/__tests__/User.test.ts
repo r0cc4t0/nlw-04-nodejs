@@ -14,6 +14,7 @@ describe('Users', () => {
       name: 'User Example'
     });
     expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('id');
   });
 
   it('Should not be able to create a user with an existing email.', async () => {
@@ -22,5 +23,14 @@ describe('Users', () => {
       name: 'User Example'
     });
     expect(response.status).toBe(400);
+  });
+
+  it('Should be able to get all users.', async () => {
+    await request(app).post('/users').send({
+      email: 'user@example2.com',
+      name: 'User Example 2'
+    });
+    const response = await request(app).get('/users');
+    expect(response.body.length).toBe(2);
   });
 });
