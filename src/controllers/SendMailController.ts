@@ -1,15 +1,28 @@
 import { Request, Response } from 'express';
 import { getCustomRepository } from 'typeorm';
+import { resolve } from 'path';
+import * as yup from 'yup';
 import UserRepository from '../repositories/UserRepository';
 import SurveyRepository from '../repositories/SurveyRepository';
 import SurveyUserRepository from '../repositories/SurveyUserRepository';
 import SendMailService from '../services/SendMailService';
-import { resolve } from 'path';
 
 class SendMailController {
 
   async execute(request: Request, response: Response) {
     const { email, survey_id } = request.body;
+
+    const schema = yup.object().shape({
+      email: yup.string().email().required(),
+      survey_id: yup.string().required()
+    });
+
+    try {
+      await schema.validate(request.body, { abortEarly: false });
+    }
+    catch (err) {
+      return response.status(400).json({ error: err });
+    }
 
     const usersRepository = getCustomRepository(UserRepository);
     const surveysRepository = getCustomRepository(SurveyRepository);
