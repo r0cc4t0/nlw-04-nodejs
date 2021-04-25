@@ -6,6 +6,7 @@ import UserRepository from '../repositories/UserRepository';
 import SurveyRepository from '../repositories/SurveyRepository';
 import SurveyUserRepository from '../repositories/SurveyUserRepository';
 import SendMailService from '../services/SendMailService';
+import AppErrors from '../errors/AppErrors';
 
 class SendMailController {
 
@@ -21,7 +22,7 @@ class SendMailController {
       await schema.validate(request.body, { abortEarly: false });
     }
     catch (err) {
-      return response.status(400).json({ error: err });
+      throw new AppErrors(err);
     }
 
     const usersRepository = getCustomRepository(UserRepository);
@@ -30,12 +31,12 @@ class SendMailController {
 
     const user = await usersRepository.findOne({ email });
     if (!user) {
-      return response.status(400).json({ error: 'The user does not exist.' });
+      throw new AppErrors('The user does not exist.');
     }
 
     const survey = await surveysRepository.findOne({ id: survey_id });
     if (!survey) {
-      return response.status(400).json({ error: 'The survey does not exist.' });
+      throw new AppErrors('The survey does not exist.');
     }
 
     const variables = {
